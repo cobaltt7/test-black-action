@@ -1,0 +1,67 @@
+# .github/workflows/test-action-outputs.yml
+name: Test action outputs
+on: [push, pull_request]
+
+jobs:
+  outputs:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: unformatted-check
+            code: "x = {  'a':1 }\n"
+            options: --check
+            is_formatted: "true"
+            change_count: "1"
+            same_count: "0"
+            failure_count: "0"
+          - name: unformatted-write
+            code: "x = {  'a':1 }\n"
+            options: ""
+            is_formatted: "true"
+            change_count: "1"
+            same_count: "0"
+            failure_count: "0"
+          - name: already-formatted
+            code: "x = {'a': 1}\n"
+            options: --check
+            is_formatted: "false"
+            change_count: "0"
+            same_count: "1"
+            failure_count: "0"
+          - name: invalid-syntax
+            code: "def (:\n"
+            options: --check
+            is_formatted: "false"
+            change_count: "0"
+            same_count: "0"
+            failure_count: "1"
+    steps:
+      - name: Create fixture
+        run: |
+          mkdir fixture
+          printf '${{ matrix.code }}' > fixture/t.py
+
+      - name: Run action
+        id: black
+        uses: Prateek99-s/black@action-is-formatted-output-3526
+        continue-on-error: true
+        with:
+          src: fixture
+          options: ${{ matrix.options }}
+
+      - name: Assert outputs
+        env:
+          GOT_IS: ${{ steps.black.outputs.is_formatted }}
+          GOT_CHG: ${{ steps.black.outputs.change_count }}
+          GOT_SAME: ${{ steps.black.outputs.same_count }}
+          GOT_FAIL: ${{ steps.black.outputs.failure_count }}
+        run: |
+          rc=0
+          check() { [ "$2" = "$3" ] || { echo "::error::$1: got '$2', want '$3'"; rc=1; }; }
+          check is_formatted  "$GOT_IS"   "${{ matrix.is_formatted }}"
+          check change_count  "$GOT_CHG"  "${{ matrix.change_count }}"
+          check same_count    "$GOT_SAME" "${{ matrix.same_count }}"
+          check failure_count "$GOT_FAIL" "${{ matrix.failure_count }}"
+          exit $rc
