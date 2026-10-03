@@ -50,7 +50,7 @@ jobs:
         with:
           src: fixture
           options: ${{ matrix.options }}
-          version: "26.5.1"
+          version: " @ git+https://github.com/Prateek99-s/black.git@action-is-formatted-output-3526"
 
       - name: Assert outputs
         env:
