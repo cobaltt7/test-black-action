@@ -50,7 +50,7 @@ jobs:
         with:
           src: fixture
           options: ${{ matrix.options }}
-          version: "26"
+          version: "26.5.1"
 
       - name: Assert outputs
         env:
