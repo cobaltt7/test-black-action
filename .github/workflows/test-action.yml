@@ -45,7 +45,7 @@ jobs:
 
       - name: Run action
         id: black
-        uses: Prateek99-s/black@action-is-formatted-output-3526
+        uses: Prateek99-s/black@66e13c7685cb5f45e7d93f2e930d16c746570bb2 # action-is-formatted-output-3526
         continue-on-error: true
         with:
           src: fixture
